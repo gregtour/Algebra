@@ -1,0 +1,345 @@
+; print a group table
+function PrintGroup(table, order)
+  duck.println("")
+  for x = 1 to order do
+    for y = 1 to order do
+      duck.print(table[x][y])
+      if y < order then
+        duck.print(", ")
+      end
+    loop
+    duck.println("")
+  loop
+  duck.println("")
+end
+
+
+; make a 2D array
+function CreateArray2D(x, y)
+  array = []
+  for i = 1 to x do
+    array[i] = []
+    for j = 1 to y do
+      array[i][j] = 0
+    loop
+  loop
+  return array
+end
+
+
+; Creates a permutation of order N
+function CreatePermutation(N)
+  p = []
+  for a = 1 to N do
+    p[a] = a
+  loop
+  return p
+end
+
+; Advances p or returns false if done
+function NextPermutation(p, N)
+  adj = []
+  avb = []
+  
+  ; available indices
+  for z = 1 to N do
+    avb[z] = 1
+  loop
+  
+  ; for each permutation bin
+  for z = 1 to N do
+    count = 1
+    ; find the 'index'
+    for zz = 1 to N do
+      if p[z] == zz then
+         avb[zz] = 0
+        break
+      end
+      if avb[zz] == 1 then
+        count = count + 1
+      end
+      ;duck.print("r")
+    loop
+    
+    ; set in adjusted index
+    adj[z] = count
+  loop
+  
+  ;duck.println(adj)
+  ; advance adjuster
+  rollaround = true
+  for z = 1 to N do
+    adj[z] = adj[z] + 1
+    cap = N - z + 1
+    if adj[z] > cap then
+      adj[z] = 1
+      rollaround = true
+;      duck.println("rollaround")
+      ;duck.println(cap + ", " + adj[z])
+    else
+      rollaround = false
+      ;duck.println(cap + ", " + adj[z])
+      break
+    end
+      ;duck.print("r")
+  loop
+  ;duck.println(adj)
+  ;PrintPermutation(adj, 4)
+  ;duck.println(duck.newline)
+  
+;  duck.println("rollaround " + rollaround)
+  
+  ; end of permutation
+  if rollaround == true then
+    return false
+  end
+  
+  ; available indices
+  for z = 1 to N do
+    avb[z] = 1
+      ;duck.print("r")
+  loop
+  
+  ; for each permutation bin
+  for z = 1 to N do
+    count = 0
+    zz = 0
+    while count < adj[z] do
+      zz = zz + 1
+      while avb[zz] == 0 do
+        zz = zz + 1
+      ;duck.print("r")
+      loop
+      count = count + 1
+      ;duck.print("r")
+    loop
+    
+    while avb[zz] == 0 do
+      zz = zz + 1
+      ;duck.print("r")
+    loop
+    
+    p[z] = zz
+    avb[zz] = 0
+      ;duck.print("r")
+  loop
+    
+  ; done
+  return true
+end
+
+
+function IsGroup(G, N)
+  ; check conditions of associativity
+  for a = 1 to N do
+    for b = 1 to N do
+      for c = 1 to N do
+        if G[G[a][b]][c] != G[a][G[b][c]] then
+          return false
+        end
+      loop
+    loop
+  loop
+
+  ; check inverse definitions
+  for a = 1 to N do
+    for b = 1 to N do
+      if G[a][b] == 1 and G[b][a] != 1 then
+        return false
+      end
+    loop
+  loop
+
+  return true
+end
+
+
+; determine if two groups are isomorphic
+function IsIsomorphism(a, b, order) 
+  pairing = CreatePermutation(order)
+  finished = false
+  result = false  
+  operations = 0
+  ; check isomorphism of one group
+  while not finished do
+    if pairing[1] == 1 then
+      conflicts = 0
+      x = 1
+      while x <= order and conflicts < 1 do
+        y = 1
+        while y <= order and conflicts < 1 do
+          if pairing[a[x][y]] != b[pairing[x]][pairing[y]] then
+            conflicts = conflicts + 1
+          end
+          y = y + 1
+        loop
+        x = x + 1
+      loop
+      
+      ; pairing is an isomorphism
+      if conflicts == 0 then
+        return true
+      end
+    end
+  
+    ; find next permutation
+    finished = not NextPermutation(pairing, order)
+  loop
+  return false
+end
+
+; count the number of algebraic groups of a given order
+function enumerate_groups(order)
+  if order <= 0 then
+    return 0
+  end
+  if order < 2 then
+    return 1
+  end
+
+  ; top-level
+  groups = []
+  group_count = 0
+
+  ; init
+  table = CreateArray2D(order, order)
+  iterator = CreateArray2D(order, order)
+  iterator_max = CreateArray2D(order, order)
+  iterating = true
+  
+  ; state 0
+  for x = 1 to order do
+    for y = 1 to order do
+      iterator[x][y] = 1
+      iterator_max[x][y] = 1
+    loop
+  loop
+  
+  ; initial table
+  table[1][1] = 1
+  for n = 2 to order do
+    table[n][1] = n
+    table[1][n] = n
+  loop
+  
+  ; "all" groups
+  while iterating do
+    invalid = false
+    ; choose
+    for x = 2 to order do
+      for y = 2 to order do
+        num_possibilities = order
+        possibilities = []
+        
+        for n = 1 to order do
+          possibilities[n] = n
+        loop
+        
+        for m = 1 to x-1 do
+          prev = table[m][y]
+          if possibilities[prev] != 0 then
+            num_possibilities = num_possibilities - 1
+            possibilities[prev] = 0
+          end
+        loop
+        
+        for m = 1 to y-1 do
+          prev = table[x][m]
+          if possibilities[prev] != 0 then
+            num_possibilities = num_possibilities - 1
+            possibilities[prev] = 0
+          end
+        loop
+        
+        for n = 1 to num_possibilities do
+          if possibilities[n] == 0 then
+            for m = n + 1 to order do
+              if possibilities[m] != 0 then
+                possibilities[n] = possibilities[m]
+                possibilities[m] = 0
+                break
+              end
+            loop
+          end
+        loop
+        
+        if iterator[x][y] > num_possibilities then
+          invalid = true
+        end
+        table[x][y] = possibilities[iterator[x][y]]
+        iterator_max[x][y] = num_possibilities
+      loop
+    loop
+    
+    ; advance
+    tumbling = true
+    cx = order
+    cy = order
+    while tumbling do
+      iterator[cx][cy] = iterator[cx][cy] + 1
+      if iterator[cx][cy] <= iterator_max[cx][cy] /*order*/ then
+        tumbling = false
+      else
+        iterator[cx][cy] = 1
+        cx = cx - 1
+        if cx == 0 then
+          cx = order
+          cy = cy - 1
+          if cy == 0 then
+            tumbling = true
+            break
+          end
+        end
+      end
+      ;duck.print("t")
+      operations = operations + 1
+    loop
+    
+    ; cease
+    if tumbling then
+      iterating = false
+    end
+    
+    ; determine
+    if not invalid and IsGroup(table, order) then
+    ;duck.print("w")
+      duplicate = false
+      g = 1
+      while g <= group_count and duplicate == false do
+        duplicate = IsIsomorphism(groups[g], table, order)
+        ;duck.print("g")
+        g = g + 1
+      loop
+      
+      ; decide
+      if not duplicate then
+        group_count = group_count + 1
+        new_group = CreateArray2D(order, order)
+        for x = 1 to order do
+          for y = 1 to order do
+            new_group[x][y] = table[x][y]
+            ;duck.print("m")
+          loop
+        loop
+        groups[group_count] = new_group
+        PrintGroup(new_group, order)
+      end
+    end
+  loop
+  
+  duck.println("time " + operations)
+  ;return [count: group_count, cayley_tables: groups]
+  return group_count
+end
+  
+
+function PrintPermutation(P, N)
+  for n = 1 to N do
+    ;duck.print(P[n])
+    if n < N then
+      ;duck.print(", ")
+    end
+  loop
+  ;duck.print(duck.newline)
+end
+
