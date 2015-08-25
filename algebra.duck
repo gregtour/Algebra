@@ -58,7 +58,6 @@ function NextPermutation(p, N)
       if avb[zz] == 1 then
         count = count + 1
       end
-      ;duck.print("r")
     loop
     
     ; set in adjusted index
@@ -74,20 +73,11 @@ function NextPermutation(p, N)
     if adj[z] > cap then
       adj[z] = 1
       rollaround = true
-;      duck.println("rollaround")
-      ;duck.println(cap + ", " + adj[z])
     else
       rollaround = false
-      ;duck.println(cap + ", " + adj[z])
       break
     end
-      ;duck.print("r")
   loop
-  ;duck.println(adj)
-  ;PrintPermutation(adj, 4)
-  ;duck.println(duck.newline)
-  
-;  duck.println("rollaround " + rollaround)
   
   ; end of permutation
   if rollaround == true then
@@ -97,7 +87,6 @@ function NextPermutation(p, N)
   ; available indices
   for z = 1 to N do
     avb[z] = 1
-      ;duck.print("r")
   loop
   
   ; for each permutation bin
@@ -108,20 +97,16 @@ function NextPermutation(p, N)
       zz = zz + 1
       while avb[zz] == 0 do
         zz = zz + 1
-      ;duck.print("r")
       loop
       count = count + 1
-      ;duck.print("r")
     loop
     
     while avb[zz] == 0 do
       zz = zz + 1
-      ;duck.print("r")
     loop
     
     p[z] = zz
     avb[zz] = 0
-      ;duck.print("r")
   loop
     
   ; done
@@ -291,7 +276,6 @@ function enumerate_groups(order)
           end
         end
       end
-      ;duck.print("t")
       operations = operations + 1
     loop
     
@@ -302,12 +286,10 @@ function enumerate_groups(order)
     
     ; determine
     if not invalid and IsGroup(table, order) then
-    ;duck.print("w")
       duplicate = false
       g = 1
       while g <= group_count and duplicate == false do
         duplicate = IsIsomorphism(groups[g], table, order)
-        ;duck.print("g")
         g = g + 1
       loop
       
@@ -318,7 +300,6 @@ function enumerate_groups(order)
         for x = 1 to order do
           for y = 1 to order do
             new_group[x][y] = table[x][y]
-            ;duck.print("m")
           loop
         loop
         groups[group_count] = new_group
@@ -326,20 +307,6 @@ function enumerate_groups(order)
       end
     end
   loop
-  
-  duck.println("time " + operations)
-  ;return [count: group_count, cayley_tables: groups]
   return group_count
 end
   
-
-function PrintPermutation(P, N)
-  for n = 1 to N do
-    ;duck.print(P[n])
-    if n < N then
-      ;duck.print(", ")
-    end
-  loop
-  ;duck.print(duck.newline)
-end
-
